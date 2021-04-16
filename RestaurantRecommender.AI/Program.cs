@@ -7,6 +7,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using RestaurantRecommender.AI.Helper;
 using SHA.BeautifulConsoleColor.Core.Class;
+using SHA.BeautifulConsoleColor.Core.Extension;
 using SHA.BeautifulConsoleColor.Core.Model;
 using MLContext = Microsoft.ML.MLContext;
 
@@ -104,10 +105,19 @@ namespace RestaurantRecommender.AI
 
 			#endregion
 
+			Console.WriteLine("Enter Restaurant Name");
+			string rn = Console.ReadLine();
+
+			if ( string.IsNullOrEmpty(rn))
+			{
+				"Error".Red();
+				Environment.Exit(-1);
+			}
+
 			var prediction = predictionEngine.Predict(new ModelInput()
 			{
 				UserId = "CLONED",
-				RestaurantName = "Rincon Huasteco"
+				RestaurantName = rn
 			});
 
 			BCCConsole.Write(BCCConsoleColor.Green,false,"\n",$"Prediction Result Score : {prediction.Score:#.0} For Rincon Huasteco");
