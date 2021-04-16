@@ -45,13 +45,13 @@ namespace RestaurantRecommender.AI
 
 			#region Not Using CV
 
-			//BCCConsole.Write(BCCConsoleColor.DarkBlue,false,"\n","Training Model");
-			//var model = trainerPipeLine.Fit(trainingDataView);
+			BCCConsole.Write(BCCConsoleColor.DarkBlue, false, "\n", "Training Model");
+			var model = trainerPipeLine.Fit(trainingDataView);
 
 			////Test 
 			//var testUserId = "U1134";
-			//var predictionEngine = mlContext.Model
-			//	.CreatePredictionEngine<ModelInput, ModelOutput>(model);
+			var predictionEngine = mlContext.Model
+				.CreatePredictionEngine<ModelInput, ModelOutput>(model);
 			//var alreadyRatedRestaurant = mlContext.Data
 			//	.CreateEnumerable<ModelInput>(trainingDataView, false)
 			//	.Where(r => r.UserId == testUserId)
@@ -103,6 +103,14 @@ namespace RestaurantRecommender.AI
 			//	"--------------------------------------------------");
 
 			#endregion
+
+			var prediction = predictionEngine.Predict(new ModelInput()
+			{
+				UserId = "CLONED",
+				RestaurantName = "Rincon Huasteco"
+			});
+
+			BCCConsole.Write(BCCConsoleColor.Green,false,"\n",$"Prediction Result Score : {prediction.Score:#.0} For Rincon Huasteco");
 
 			//HyperParameterExploration(mlContext, dataPreProcessingPipeLine, trainingDataView);
 		}
