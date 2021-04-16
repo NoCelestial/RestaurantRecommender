@@ -1,10 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Microsoft.ML;
+using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using RestaurantRecommender.AI.Helper;
 using SHA.BeautifulConsoleColor.Core.Class;
 using SHA.BeautifulConsoleColor.Core.Model;
+using MLContext = Microsoft.ML.MLContext;
 
 namespace RestaurantRecommender.AI
 {
@@ -42,7 +45,41 @@ namespace RestaurantRecommender.AI
             var model = trainerPipeLine.Fit(trainingDataView);
 
             //Test 
+            var testUserId = "U1134";
+            var predictionEngine = mlContext.Model
+	            .CreatePredictionEngine<ModelInput, ModelOutput>(model);
+            var alreadyRatedRestaurant = mlContext.Data
+	            .CreateEnumerable<ModelInput>(trainingDataView, false)
+	            .Where(r => r.UserId == testUserId)
+	            .Select(r => r.RestaurantName)
+	            .Distinct();
+            var allRestaurantNames = trainingDataView
+	            .GetColumn<string>("RestaurantName")
+	            .Distinct().Where(r => !alreadyRatedRestaurant.Contains(r));
+            var scoredRestaurant = allRestaurantNames
+	            .Select(rn =>
+	            {
+					var prediction = predictionEngine.Predict(
+						new ModelInput()
+						{
+                            UserId = testUserId,
+                            RestaurantName = rn
+						});
+					return (RestaurantName: rn, PredictedScore: prediction.Score);
+	            });
 
+            var top10Restaurant = scoredRestaurant
+	            .OrderByDescending(r => r.PredictedScore)
+	            .Take(10);
+            BCCConsole.Write(BCCConsoleColor.DarkGreen,false,
+	            "\n",
+	            $"Top 10 Restaurant Name & Rate For User {testUserId}",
+	            "----------------------------------------------------");
+            foreach (var top in top10Restaurant)
+            {
+	            BCCConsole.Write(BCCConsoleColor.DarkGreen,false,$"Prediction Score [{top.PredictedScore:#.0}] | Restaurant Name [{top.RestaurantName}] ");
+            }
+            BCCConsole.Write(BCCConsoleColor.DarkGreen,false, "----------------------------------------------------");
         }
     }
 }
