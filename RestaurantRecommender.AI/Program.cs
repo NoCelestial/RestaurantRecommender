@@ -35,6 +35,14 @@ namespace RestaurantRecommender.AI
                 Quiet = true
 			};
 
-		}
+			var trainer = mlContext.Recommendation().Trainers.MatrixFactorization(options);
+
+			var trainerPipeLine = dataPreProcessingPipeLine.Append(trainer);
+            BCCConsole.Write(BCCConsoleColor.DarkBlue,false,"\n","Training Model");
+            var model = trainerPipeLine.Fit(trainingDataView);
+
+            //Test 
+
+        }
     }
 }
